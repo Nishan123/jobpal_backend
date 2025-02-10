@@ -1,25 +1,35 @@
-const {Sequelize, DataTypes} = require('sequelize');
+const { Sequelize, DataTypes } = require("sequelize");
 
-const sequelize = require('../database/db');
+const sequelize = require("../database/db");
 
-const User = sequelize.define('Job',{
+const Job = sequelize.define("Job", {
+  job_id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  company_name: {
+    type: DataTypes.STRING,
+  },
 
-    job_id:{
-       type: DataTypes.INTEGER,
-       primaryKey: true, 
-       autoIncrement: true,
-    } ,
-    title: {
-        type:DataTypes.STRING,
-     },
-    description: {
-        type:DataTypes.STRING,
-
-    },
-    experience: {
-        type:DataTypes.STRING,
-
-    }
-})
+  job_location: {
+    type: DataTypes.STRING,
+  },
+  company_logo: {
+    type: DataTypes.STRING,
+  },
+  position: {
+    type: DataTypes.STRING,
+  },
+  description: {
+    type: DataTypes.STRING,
+  },
+  experience: {
+    type: DataTypes.STRING,
+  },
+  salary: {
+    type: DataTypes.STRING,
+  },
+});
 
 module.exports = Job;
