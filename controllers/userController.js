@@ -4,18 +4,18 @@ const bcrypt = require('bcrypt');
 
 // Register a new user
 const registerUser = async (req, res) => {
-    const { username, password } = req.body;
+    const { first_name, last_name, email, password } = req.body;
 
     // Validate input
-    if (!username || !password) {
-        return res.status(400).json({ error: 'Username and password are required' });
+    if (!first_name || !last_name || !email || !password) {
+        return res.status(400).json({ error: 'All fields are required' });
     }
 
     try {
-        // Check if the username already exists
-        const existingUser = await User.findOne({ where: { username } });
+        // Check if the email already exists
+        const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
-            return res.status(400).json({ error: 'Username already exists' });
+            return res.status(400).json({ error: 'Email already exists' });
         }
 
         // Hash the password
@@ -23,7 +23,12 @@ const registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         // Create the user
-        const newUser = await User.create({ username, password: hashedPassword });
+        const newUser = await User.create({ 
+            first_name,
+            last_name,
+            email,
+            password: hashedPassword 
+        });
 
         res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
@@ -35,16 +40,16 @@ const registerUser = async (req, res) => {
 
 // Login an existing user
 const loginUser = async (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
     // Validate input
-    if (!username || !password) {
-        return res.status(400).json({ error: 'Username and password are required' });
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
     }
 
     try {
-        // Find the user by username
-        const user = await User.findOne({ where: { username } });
+        // Find the user by email
+        const user = await User.findOne({ where: { email } });
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -57,7 +62,12 @@ const loginUser = async (req, res) => {
 
         // Generate a JWT token
         const token = jwt.sign(
-            { id: user.id, username: user.username },
+            { 
+                id: user.id, 
+                email: user.email,
+                first_name: user.first_name,
+                last_name: user.last_name 
+            },
             process.env.JWT_SECRET || 'JKHSDKJBKJSDJSDJKBKSD345345345345',
             { expiresIn: '24h' }
         );
@@ -65,7 +75,12 @@ const loginUser = async (req, res) => {
         res.status(200).json({
             message: 'Login successful',
             token,
-            user: { id: user.id, username: user.username }
+            user: {
+                id: user.id,
+                email: user.email,
+                first_name: user.first_name,
+                last_name: user.last_name
+            }
         });
     } catch (error) {
         console.error(error);

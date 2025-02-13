@@ -2,24 +2,20 @@ const { Sequelize, DataTypes } = require("sequelize");
 
 const sequelize = require("../database/db");
 
-const User = sequelize.define("User", {
-  id: {
+const Application = sequelize.define("Application", {
+  job_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-  first_name: {
+  
+  applied_by: {
     type: DataTypes.STRING,
   },
-  last_name: {
-    type: DataTypes.STRING,
-  },
-  email: {
-    type: DataTypes.STRING,
-  },
-  password: {
+
+  cv: {
     type: DataTypes.STRING,
   },
 });
 
-module.exports = User;
+module.exports = Application;

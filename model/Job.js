@@ -8,6 +8,9 @@ const Job = sequelize.define("Job", {
     primaryKey: true,
     autoIncrement: true,
   },
+  posted_by: {
+    type: DataTypes.STRING,
+  },
   company_name: {
     type: DataTypes.STRING,
   },
@@ -17,6 +20,12 @@ const Job = sequelize.define("Job", {
   },
   company_logo: {
     type: DataTypes.STRING,
+    allowNull: true,
+    get() {
+      const rawValue = this.getDataValue('company_logo');
+      if (!rawValue) return null;
+      return rawValue;  // Return the raw value, we'll handle the URL construction in the frontend
+    }
   },
   position: {
     type: DataTypes.STRING,
