@@ -9,7 +9,11 @@ const Job = sequelize.define("Job", {
     autoIncrement: true,
   },
   posted_by: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'Users',
+      key: 'id'
+    }
   },
   company_name: {
     type: DataTypes.STRING,

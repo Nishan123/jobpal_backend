@@ -83,7 +83,7 @@ const loginUser = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
+        console.error('Login error:', error);
         res.status(500).json({ error: 'Failed to login user' });
     }
 };
@@ -117,18 +117,87 @@ const createUser = async (req, res) => {
     }
 }
 
-// const updateUser = async(req, res)=>{
-//     try {
-//         const user = await User.findByPk(req.params.id);
-//         if (!user) {
-//             return res.status(404).json({ message: 'User not found' });
-//         }
-//         await user.update(req.body);
-//         res.json(user);
-//     } catch (err) {
-//         res.status(400).json({ error: err.message });
-//     }
-// }
+const updateUser = async (req, res) => {
+    try {
+        const userId = req.user.id; // Get user ID from JWT token
+        const { first_name, last_name } = req.body;
+
+        // Find the user
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update user data
+        await user.update({
+            first_name,
+            last_name
+        });
+
+        // Generate a new token with updated information
+        const token = jwt.sign(
+            { 
+                id: user.id, 
+                email: user.email,
+                first_name: user.first_name,
+                last_name: user.last_name 
+            },
+            process.env.JWT_SECRET || 'JKHSDKJBKJSDJSDJKBKSD345345345345',
+            { expiresIn: '24h' }
+        );
+
+        // Send back updated user data and new token
+        res.json({
+            message: 'Profile updated successfully',
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                first_name: user.first_name,
+                last_name: user.last_name
+            }
+        });
+    } catch (error) {
+        console.error('Update error:', error);
+        res.status(500).json({ message: 'Failed to update profile' });
+    }
+};
+
+const changePassword = async (req, res) => {
+    try {
+        const userId = req.user.id; // Get user ID from JWT token
+        const { currentPassword, newPassword } = req.body;
+
+        // Validate input
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'Current password and new password are required' });
+        }
+
+        // Find the user
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Verify current password
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Current password is incorrect' });
+        }
+
+        // Hash the new password
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+        // Update password
+        await user.update({ password: hashedPassword });
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({ error: 'Failed to update password' });
+    }
+};
 
 // const deleteUser = async(req, res)=>{
 //     try {
@@ -145,4 +214,4 @@ const createUser = async (req, res) => {
 
 // module.exports = {createUser, getUser, deleteUser, updateUser}
 
-module.exports = { loginUser, registerUser, getUser }
+module.exports = { loginUser, registerUser, getUser, updateUser, changePassword }
