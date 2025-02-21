@@ -173,3 +173,24 @@ exports.updateApplicationStatus = async (req, res) => {
     res.status(500).json({ error: 'Failed to update application status' });
   }
 };
+
+// Get applications for the logged-in user
+exports.getMyApplications = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const applications = await Application.findAll({
+      where: { applied_by: userId },
+      include: [{
+        model: Job,
+        attributes: ['position', 'company_name', 'job_location']
+      }],
+      order: [['applied_date', 'DESC']]
+    });
+
+    res.status(200).json(applications);
+  } catch (error) {
+    console.error('Get my applications error:', error);
+    res.status(500).json({ error: "Failed to fetch applications: " + error.message });
+  }
+};
